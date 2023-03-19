@@ -1,0 +1,31 @@
+{
+  "name": "node-red-contrib-discrete-fsm",
+  "version": "0.0.1",
+  "description": "Discrete node state machine",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Koster",
+  "license": "BSD-3-Clause",
+  "keywords": ["node-red", "fsm", "finite state machine", "state machine", "plc" ],
+  "homepage": "https://github.com/mjkoster/node-red-contrib-discrete-fsm",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mjkoster/node-red-contrib-discrete-fsm.git"
+	},
+	"bugs": {
+		"url": "https://github.com/mjkoster/node-red-contrib-discrete-fsm/issues"
+	},
+  "node-red" : {
+    "nodes": {
+      "input": "nodes/input.js",
+      "condition": "nodes/condition.js",
+      "state": "nodes/state.js",
+      "output": "nodes/output.js"
+    }
+  },
+  "dependencies": {
+    "mathjs": "*"
+  }
+}

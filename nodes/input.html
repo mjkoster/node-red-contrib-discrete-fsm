@@ -1,0 +1,71 @@
+<script type="text/javascript">
+  RED.nodes.registerType('input',{
+      category: 'DiscreteFSM',
+      color: '#3FADB5',
+      defaults: {
+          name: {value:""},
+          initialvalue: {value:false},
+          initialvaluetype: {value:"bool"}
+      },
+      inputs:1,
+      outputs:1,
+      icon: "font-awesome/fa-sign-in",
+      label: function() {
+          return this.name||"input";
+      },
+      labelStyle: function() {
+          return this.name?"node_label_italic":"";
+      },
+      oneditprepare: function() {
+        $("#node-input-initialvalue").typedInput({
+          default:this.initialvaluetype||'bool',  
+          types:["str","num","bool"],
+          typeField: "#node-input-initialvaluetype"
+        });
+      },
+      oneditsave: function() {
+        this.initialvaluetype = $("#node-input-initialvalue").typedInput('type');
+      }
+  });
+</script>
+
+<script type="text/html" data-template-name="input">
+  <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+      <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-initialvalue"><i class="fa fa-pencil-square-o"></i> Initial Value</label>
+    <input type="text" id="node-input-initialvalue" placeholder="Initial value">
+    <input type="hidden" id="node-input-initialvaluetype">
+  </div>
+</script>
+
+<script type="text/markdown" data-help-name="input">
+## Input Node
+Recieves input data and sends to Condition nodes
+
+### Inputs
+#### Topic
+#### Payload
+- boolean, string, or number type
+
+### Outputs
+#### Topic 
+- <code>init</code> initializes the downstream Condition nodes with the initial value
+- <code>input</code> sends received input value to Condition nodes
+
+#### Payload
+- <code>init</code> and <code>input</code> object type with <code>node.name</code> as key and input value or initial value
+
+### Details
+Input nodes receive values from the Node-RED application, associate values with a data types, and transmit named value records to Condition nodes using a message topic of "input", to be evaluated in the Condition nodes. 
+
+Input nodes are configured with initial values in order to start the state machine with a known set of Conditions. During flow initialization, the Input nodes transmit initial values to the Condition nodes, using a message with a topic of "init".
+
+### Settings
+#### Initial Value
+- Provides an initial type and value to the downstream Condition node. The type may be Boolean, Number, or String
+
+### References
+</script>

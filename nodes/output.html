@@ -1,0 +1,60 @@
+<script type="text/javascript">
+  RED.nodes.registerType('output',{
+      category: 'DiscreteFSM',
+      color: '#3FADB5',
+      defaults: {
+          name: {value:""},
+          rbe: {value:false}
+      },
+      inputs:1,
+      outputs:1,
+      icon: "font-awesome/fa-sign-out",
+      label: function() {
+          return this.name||"output";
+      },
+      labelStyle: function() {
+          return this.name?"node_label_italic":"";
+      },
+      align: 'right'
+  });
+</script>
+
+<script type="text/html" data-template-name="output">
+  <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+      <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row">
+    <label>RBE:</label>
+    <input type="checkbox" id="node-input-rbe" style="display: inline-block; width: auto; vertical-align: top;">
+    <label for="node-input-rbe">rbe</label>
+  </div>
+</script>
+
+<script type="text/markdown" data-help-name="output">## Output Node
+Recieves Output messages from State nodes and sends output values to downstream nodes
+
+### Inputs
+#### Topic
+- <code>init</code> When an init message is received, the Output node stores the value and sends a message consisting of the value to the downstream application node(s)
+
+- <code>output</code> When an init message is received, the Output node stores the value and sends a message consisting of the value to the downstream application node(s) if rbe is not checked, or if RBE is checked and the new value is different from the last stored value.
+
+#### Payload
+- <code>init</code and <code>output</code> object type with <code>node.name</code> as keys and output values or initial values
+
+### Outputs
+#### Topic
+- The topic of a message sent from an Output node is undefined
+#### Payload
+- The payload from an Output node consists of a JSON representation of the plain boolean, nomber, or string value
+
+### Details
+Output nodes recieve output messages from State nodes, and select the output value within the output message that corresponds to the Output name, which is the same as the Output node name.
+
+### Settings
+#### rbe
+- Report By Exception should normally be checked. It supresses the output message when the state machine transitions to a state and the output value doesn't change. In some applications, it's useful to send an output message even if the value doesn't change.
+
+### References
+</script>

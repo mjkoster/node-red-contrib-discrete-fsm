@@ -1,0 +1,201 @@
+<script type="text/javascript">
+
+  const defaultOutput = {name: "", value: false, type: "bool"};
+  const defaultTransition = {condition: "", state: ""};
+
+  RED.nodes.registerType('state',{
+    category: 'DiscreteFSM',
+    color: '#3FADB5',
+    defaults: {
+      name: {value: ""},
+      isinitialstate: {value: false},
+      outputlist: {value: [defaultOutput]},
+      transitionlist: {value: [defaultTransition]}
+    },
+    inputs:1,
+    outputs:1,
+    icon: "font-awesome/fa-cogs",
+    label: function() {
+      return this.name||"state";
+    },
+    labelStyle: function() {
+      return this.name?"node_label_italic":"";
+    },
+    oneditprepare: function() {
+
+      var node = this;
+
+      var outputdata = $('#node-input-outputdata-container').css('min-height','180px').css('min-width','450px');
+      outputdata.editableList({
+        addButton: 'Add Output',
+        addItem: function(container,index,itemspec) {
+          var item = itemspec || defaultOutput
+          container.css({
+            overflow: 'hidden',
+            whiteSpace: 'nowrap'
+          });
+          var row = $('<div/>').appendTo(container);
+
+          var outputName = $('<input/>',{class:"node-input-name",type:"text"})
+            .css("width","25%")
+            .appendTo(row)
+            .typedInput({default:'str', types:['str']});
+
+          $('<div/>',{style: 'display:inline-block; padding:0px 6px;'})
+            .text('=')
+            .appendTo(row);
+
+          var outputValue = $('<input/>',{class:"node-input-value",type:"text"})
+            .css("width","calc(75% - 30px)")
+            .appendTo(row)
+            .typedInput({default:item.type || defaultOutput.type, types:['str','num','bool']});
+          
+          outputName.typedInput('value',item.name || defaultOutput.name);
+          outputValue.typedInput('value',item.value || defaultOutput.value);
+          // (default should do this) outputValue.typedInput('type', item.type || defaultOutput.type)
+        },
+        removable: true,
+        sortable: true
+      });
+
+      var transitiondata = $('#node-input-transitiondata-container').css('min-height','180px').css('min-width','450px');
+      transitiondata.editableList({
+        addButton:'Add Transition',
+        addItem: function(container,index,itemspec) {
+          var item = itemspec || defaultTransition
+          container.css({
+            overflow: 'hidden',
+            whiteSpace: 'nowrap'
+          });
+          var row = $('<div/>').appendTo(container);
+
+          $('<div/>',{style: 'display:inline-block; padding:0px 6px;'})
+            .text('on')
+            .appendTo(row);
+
+          var conditionName = $('<input/>',{class:"node-input-condition",type:"text"})
+            .css("width","40%")
+            .appendTo(row)
+            .typedInput({default:'str', types:['str']});
+
+          $('<div/>',{style: 'display:inline-block; padding:0px 6px;'})
+            .text('goto')
+            .appendTo(row);
+
+          var stateName = $('<input/>',{class:"node-input-state",type:"text"})
+            .css("width","40%")
+            .appendTo(row)
+            .typedInput({default:'str', types:['str']});
+
+          conditionName.typedInput('value', item.condition || defaultTransition.condition);
+          stateName.typedInput('value', item.state || defaultTransition.state);
+        },
+        removable: true,
+        sortable: true
+      });
+
+      node.outputlist.forEach( function(output) {
+        outputdata.editableList('addItem', output );
+      });
+
+      node.transitionlist.forEach( function(transition) {
+        transitiondata.editableList('addItem', transition );
+      });
+      
+    },
+
+    oneditsave: function() {
+
+      var node = this;
+
+      var outputitems = $("#node-input-outputdata-container").editableList('items');
+      node.outputlist = [];
+      outputitems.each(function(index) {
+        var item = $(this);
+        var name = item.find(".node-input-name").typedInput('value');
+        var value = item.find(".node-input-value").typedInput('value');
+        var type = item.find(".node-input-value").typedInput('type')
+        node.outputlist.push({name:name, value:value, type:type});
+      });
+
+      var transitionitems = $("#node-input-transitiondata-container").editableList('items');
+      node.transitionlist = [];
+      transitionitems.each(function(index) {
+        var item = $(this);
+        var condition = item.find(".node-input-condition").typedInput('value');
+        var state = item.find(".node-input-state").typedInput('value');
+        node.transitionlist.push({condition:condition, state:state});
+      });
+    }
+  });
+</script>
+
+<script type="text/html" data-template-name="state">
+  <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+      <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+
+  <div class="form-row">
+    <label>Initial State</label>
+    <input type="checkbox" id="node-input-isinitialstate" style="display: inline-block; width: auto; vertical-align: top;">
+    <label for="node-input-isinitialstate">one node</label>
+  </div>
+
+  <label>Outputs</label>
+  <div class="form-row node-input-outputdata-container-row">
+    <ol id="node-input-outputdata-container"></ol>
+  </div>
+
+  <label>Transitions</label>
+  <div class="form-row node-input-transitiondata-container-row">
+    <ol id="node-input-transitiondata-container"></ol>
+  </div>
+
+</script>
+
+<script type="text/markdown" data-help-name="state">## State Node
+Receives Condition data and sends transition messages to other State nodes
+
+### Inputs
+#### Topic
+- <code>condition</code> when a condition topic is received, the condition name is looked up in the transition table and, if there is a match, a message is sent with the topic "transition" and the name of the State to transition to.
+
+- <code>transition</code> when a State node receives a transition message with its own State name, it assumes the current state and sets its output values.
+
+#### Payload
+- condition message payloads consist of the name of the Condition that has been found to be True
+- transition message payloads consist of the name of the next State to transition to
+
+### Outputs
+#### Topic 
+- <code>transition</code> when a Condition occurs that has a defined Transition, a transition topic message is sent from the node in the current state to select the next State
+
+- <code>output</code> When a Transition occurs, the next State sends a message with the topic "output" which contains the values for the Outputs assocuited with the next State.
+
+- <code>init</code> The State defined as the initial state sends its output values to the Output nodes when the state machine is initialized, using a message wit hthe "init" topic.
+
+#### Payload
+- The transition message payload consistts of a string representation of the name of the Next state to transition to, which is the same as the name of the State.
+
+- The output message and init message payload consists of a JSON object having a key-value pair for each Output, where the key is the name of the Output, and the value is the value for the Output.
+
+### Details
+The State node performs two related functions. FIrst, incoming Conditions are evaluated by the State node for the current state. When a Condition is defined for the current state, in the State's transition table, a transition message is sent with the name of the next State from the table, and the "currentState" status is set to False.
+
+The transition message loops back to the inputs of all State nodes, where each State node compares the State name in the transition message to its own name. When a match occcurs, that State is the new current State, and the currentState status for that node is set to True. Finally, the "output" topic message is sent to the Output nodes to set the Output values for thw new State. 
+
+### Settings
+#### InitialState
+- Checking this option selects this State as the initial state when the state machine is started. Only one State node should be selected as InitialState, or results may be unpredictable.
+
+#### Outputs
+- All of the Outputs affected by transition to this State are assigned values in this setting. There is one entry in the form to begin with (A state should affect at least one output) and additional Outputs may be added by clicking  the "+ Add Output" button. Each entry defines the Value for one OUtput.
+
+#### Transitions
+- This is where the Transitions from this State to other States are defined. There is one entry in the form to begin with (A State should have at least one transition to another State) and additional transitions may be defined by clicking the "+ Add Transition" button. Each entry defines a Condition and a State to transition to when the Condition becomes True.
+
+### References
+</script>
+
+

@@ -1,0 +1,77 @@
+<script type="text/javascript">
+  RED.nodes.registerType('condition',{
+      category: 'DiscreteFSM',
+      color: '#3FADB5',
+      defaults: {
+          name: {value:""},
+          expression: {value:"true"},
+          oninputtopic: {value: true},
+          onsynctopic: {value: false}
+      },
+      inputs:1,
+      outputs:1,
+      icon: "font-awesome/fa-filter",
+      label: function() {
+          return this.name||"condition";
+      },
+      labelStyle: function() {
+          return this.name?"node_label_italic":"";
+      }
+  });
+</script>
+
+<script type="text/html" data-template-name="condition">
+  <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+      <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-expression"><i class="fa fa-filter"></i> Expression</label>
+    <input type="text" id="node-input-expression" placeholder="Expression">
+</div>
+<div class="form-row">
+  <label>Evaluate on:</label>
+  <input type="checkbox" id="node-input-oninputtopic" style="display: inline-block; width: auto; vertical-align: top;">
+  <label for="node-input-oninputtopic">Input</label>
+  <input type="checkbox" id="node-input-onsynctopic" style="display: inline-block; width: auto; vertical-align: top;">
+  <label for="node-input-onsynctopic">Sync</label>
+</div>
+</script>
+
+<script type="text/markdown" data-help-name="condition">
+## Condition Node
+Evaluates data from Input nodes and notifies State nodes when a Condition expression evaluates to logic true. 
+
+### Inputs
+#### Topic
+- <code>init</code> stores the value recieved from the input node, does not evaluate the condition
+- <code>input</code> stores the input value and evaluates if asynchronous mode is checked
+- <code>sync</code> evaluates the condition from the stored values if synchronous mode is checked
+
+#### Payload
+- object type with <code>node.name</code> as key and input value or initial value
+
+### Outputs
+#### Topic 
+- <code>condition</code> when a condition evaluates to logic true, a message with the topic "condition" is sent
+
+#### Payload
+- A string representation of the Condition name, which is the same as the name of the Condition node
+
+### Details
+Each time an input value is received, th evalue is stored as a context variable in the node. A mathjs Expression is evaluated over a set of Input variables. Evaluation may be asynchronous, that is whenever a new input value is received, or synchronous, that is when a message with the "sync" topic is received.
+
+When the Expression evaluates to logic True, a message is sent to the downstream Statenodes with the name of the Condition.
+
+### Settings
+#### Expression
+- a string consisting of a mathjs expression (see mathjs) that evaluates to a boolean true or false. The variables in the expression use the Input names (name of the associated input node)
+
+#### Evaluate on Input
+- Checking this option causes the Condition node to evaluate the Expression every time an input us received.
+
+#### Evaluate on Sync
+- Checking this option causes the Condition node to evaluate the Expression when a message is recieved with tte topic of "sync"
+
+### References
+</script>
