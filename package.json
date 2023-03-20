@@ -18,7 +18,6 @@
 		"url": "https://github.com/mjkoster/node-red-contrib-discrete-fsm/issues"
 	},
   "node-red" : {
-    "version": ">=3.0.0",
     "nodes": {
       "input": "nodes/input.js",
       "condition": "nodes/condition.js",
